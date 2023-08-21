@@ -25,8 +25,8 @@ resource "null_resource" "lambda_image_builder" {
     working_dir = "./lambda"
     command     = <<EOF
                 aws ecr get-login-password --region ${var.region} | docker login --username AWS --password-stdin ${local.account_id}.dkr.ecr.${var.region}.amazonaws.com
-                DOCKER_BUILDKIT=0 docker build -t ${aws_ecr_repository.repo.repository_url}:${local.ecr_image_tag} .
-                docker push ${aws_ecr_repository.repo.repository_url}:${local.ecr_image_tag}
+                DOCKER_BUILDKIT=0 docker build -t ${data.aws_ecr_repository.repo.repository_url}:${local.ecr_image_tag} .
+                docker push ${data.aws_ecr_repository.repo.repository_url}:${local.ecr_image_tag}
             EOF
   }
 }
@@ -66,7 +66,7 @@ resource "aws_lambda_function" "join_game_lambda" {
   function_name = local.join_game_lambda_name
   role          = aws_iam_role.lambda_role.arn
   timeout       = 300
-  image_uri     = "${aws_ecr_repository.repo.repository_url}@${data.aws_ecr_image.lambda_image.id}"
+  image_uri     = "${data.aws_ecr_repository.repo.repository_url}@${data.aws_ecr_image.lambda_image.id}"
   package_type  = "Image"
 
   architectures = ["arm64"] # need this because image built locally on arm64 m1 mac
@@ -89,7 +89,7 @@ resource "aws_lambda_function" "start_game_lambda" {
   function_name = local.start_game_lambda_name
   role          = aws_iam_role.lambda_role.arn
   timeout       = 300
-  image_uri     = "${aws_ecr_repository.repo.repository_url}@${data.aws_ecr_image.lambda_image.id}"
+  image_uri     = "${data.aws_ecr_repository.repo.repository_url}@${data.aws_ecr_image.lambda_image.id}"
   package_type  = "Image"
 
   architectures = ["arm64"] # need this because image built locally on arm64 m1 mac
@@ -111,7 +111,7 @@ resource "aws_lambda_function" "play_cards_lambda" {
   function_name = local.play_cards_lambda_name
   role          = aws_iam_role.lambda_role.arn
   timeout       = 300
-  image_uri     = "${aws_ecr_repository.repo.repository_url}@${data.aws_ecr_image.lambda_image.id}"
+  image_uri     = "${data.aws_ecr_repository.repo.repository_url}@${data.aws_ecr_image.lambda_image.id}"
   package_type  = "Image"
 
   architectures = ["arm64"] # need this because image built locally on arm64 m1 mac
