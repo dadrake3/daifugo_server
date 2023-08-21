@@ -1,2 +1,0 @@
-# Graphql Multiplayer Daifugo Server
-
