@@ -76,12 +76,32 @@ resource "aws_iam_policy" "dynamodb_lambda_policy" {
   policy      = data.aws_iam_policy_document.dyanmodb_rw_policy_document.json
 }
 
+# Create log group policy
+
+data "aws_iam_policy_document" "lambda_log_publishing_policy_document" {
+  statement {
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:PutLogEventsBatch",
+    ]
+
+    resources = ["arn:aws:logs:*:*:*"]
+  }
+}
+
+resource "aws_iam_policy" "lambda_log_publishing_policy" {
+  name     = "${var.prefix}_lambda_log_publishing_policy"
+  description = "This policy allows lambdas to create log groups"
+  policy = data.aws_iam_policy_document.lambda_log_publishing_policy_document.json
+}
+
 
 # ===================
 # --- Attachments ---
 # -------------------
 
-# Attach Invoke Lambda policy to AppSync role.
+# Attach policies to roles.
 
 resource "aws_iam_role_policy_attachment" "appsync_invoke_lambda" {
   role       = aws_iam_role.appsync_role.name
@@ -91,6 +111,11 @@ resource "aws_iam_role_policy_attachment" "appsync_invoke_lambda" {
 resource "aws_iam_role_policy_attachment" "lambda_rw_dynamodb" {
   role       = aws_iam_role.lambda_role.name
   policy_arn = aws_iam_policy.dynamodb_lambda_policy.arn
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_log_publishing" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = aws_iam_policy.lambda_log_publishing_policy.arn
 }
 
 resource "aws_iam_role_policy_attachment" "appsync_rw_dynamodb" {

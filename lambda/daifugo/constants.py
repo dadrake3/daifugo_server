@@ -28,7 +28,7 @@ RANKS = {
 PLAYER_TABLE = "daifugo_api_player_table"
 GAME_TABLE = "daifugo_api_game_table"
 HAND_TABLE = "daifugo_api_hand_table"
-STATE_TABLE = "daifugo_api_game_state_table"
+STATE_TABLE = "daifugo_api_state_table"
 
 HTTP_HEADERS = {
     "Content-Type": "application/graphql",

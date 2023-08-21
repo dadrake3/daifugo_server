@@ -1,4 +1,3 @@
-import json
 import logging
 
 import boto3
@@ -6,8 +5,7 @@ import urllib3
 
 from .common import (deal_hands, get_game, get_players, get_starting_hand,
                      post_mutation, update_hand)
-from .model import GameState
-from .mutations import CREATE_STATE_MUTATION
+from .mutations import CREATE_STATE_MUTATION, UPDATE_GAME_MUTATION
 
 logger = logging.getLogger(__name__)
 
@@ -43,4 +41,11 @@ def start_game_handler(event, context):
             active_player_idx=starting_player_idx,
         ),
     )
+
+    post_mutation(
+        UPDATE_GAME_MUTATION,
+        http_client,
+        variables=dict(id=game_id, joinable=False, state_id=state_json["id"]),
+    )
+
     return state_json

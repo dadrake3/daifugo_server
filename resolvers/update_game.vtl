@@ -27,7 +27,8 @@
         #set( $expression = "$expression #joinable = :joinable" )
     #end
     
-    #if( !$util.isNullOrEmpty($ctx.args.players) && $context.arguments.joinable)
+    ## #if( !$util.isNullOrEmpty($ctx.args.players) && $context.arguments.joinable)
+    #if( !$util.isNullOrEmpty($ctx.args.players) )
     
     	$!{expValues.put(":players", $util.dynamodb.toDynamoDB($context.arguments.players))}
         $!{expNames.put("#players", "players")}

@@ -5,6 +5,8 @@ locals {
     account_id          = data.aws_caller_identity.current.account_id
     ecr_repository_name = "${var.prefix}-ecr"
     ecr_image_tag       = "latest"
+    join_game_lambda_name = "${var.prefix}_join_game"
+    start_game_lambda_name = "${var.prefix}_start_game"
 }
 
 resource "aws_ecr_repository" "repo" {
@@ -36,9 +38,27 @@ data "aws_ecr_image" "lambda_image" {
     image_tag       = local.ecr_image_tag
 }
 
+resource "aws_cloudwatch_log_group" "join_game_lambda_log_group" {
+    name              = "/aws/lambda/${local.join_game_lambda_name}"
+    retention_in_days = 7
+    lifecycle {
+        prevent_destroy = false
+    }
+}
+
+resource "aws_cloudwatch_log_group" "start_game_lambda_log_group" {
+    name              = "/aws/lambda/${local.start_game_lambda_name}"
+    retention_in_days = 7
+    lifecycle {
+        prevent_destroy = false
+    }
+}
+
+
+
 resource "aws_lambda_function" "join_game_lambda" {
-    depends_on = [null_resource.lambda_image_builder]
-    function_name = "${var.prefix}_join_game"
+    depends_on = [null_resource.lambda_image_builder, aws_cloudwatch_log_group.join_game_lambda_log_group]
+    function_name = "${local.join_game_lambda_name}"
     role = aws_iam_role.lambda_role.arn
     timeout = 300
     image_uri = "${aws_ecr_repository.repo.repository_url}@${data.aws_ecr_image.lambda_image.id}"
@@ -60,8 +80,8 @@ resource "aws_lambda_function" "join_game_lambda" {
 }
 
 resource "aws_lambda_function" "start_game_lambda" {
-    depends_on = [null_resource.lambda_image_builder]
-    function_name = "${var.prefix}_start_game"
+    depends_on = [null_resource.lambda_image_builder, aws_cloudwatch_log_group.start_game_lambda_log_group]
+    function_name = "${local.start_game_lambda_name}"
     role = aws_iam_role.lambda_role.arn
     timeout = 300
     image_uri = "${aws_ecr_repository.repo.repository_url}@${data.aws_ecr_image.lambda_image.id}"

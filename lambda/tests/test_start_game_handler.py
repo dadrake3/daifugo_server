@@ -21,7 +21,7 @@ def event():
 @pytest.mark.integration
 def test_start_game_handler_e2e(
     setup_environment_vars, mocker, empty_context, empty_game, dynamodb
-):
+):  
     player_names = ["Daryl", "Will", "Rebers"]
     players = []
     for player_name in player_names:
@@ -36,7 +36,9 @@ def test_start_game_handler_e2e(
     state = GameState.from_json(state_json)
 
     hands = get_hands([player.hand_id for player in players], dynamodb)
+    game = get_game(empty_game.id, dynamodb)
 
+    assert not game.joinable
     assert {hand.id for hand in hands} == {player.hand_id for player in players}
 
     # cleanup test

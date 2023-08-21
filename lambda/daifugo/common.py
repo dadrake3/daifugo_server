@@ -8,7 +8,7 @@ import urllib3
 from .constants import (API_URL, GAME_TABLE, HAND_TABLE, HTTP_HEADERS,
                         PLAYER_TABLE, STATE_TABLE)
 from .model import Card, Deck, Game, GameState, Hand, Player
-from .mutations import (UPDATE_HAND_MUTATION, UPDATE_PLAYER_MUTATION,
+from .mutations import (UPDATE_HAND_MUTATION, UPDATE_PLAYER_MUTATION, CREATE_STATE_MUTATION,
                         UPDATE_STATE_MUTATION, Mutation)
 
 logger = logging.getLogger(__name__)
@@ -84,6 +84,19 @@ def update_player(player: Player, http_client: urllib3.PoolManager) -> Player:
         variables=dict(id=player.id, has_passed=player.has_passed, rank=player.rank),
     )
     return Player.from_json(player_json)
+
+
+def create_game_state(game_id: str, starting_player_id: str, starting_player_idx: int, http_client: urllib3.PoolManager) -> GameState:
+    state_json = post_mutation(
+        CREATE_STATE_MUTATION,
+        http_client,
+        variables=dict(
+            game_id=game_id,
+            active_player_id=starting_player_id,
+            active_player_idx=starting_player_idx,
+        ),
+    )
+    return GameState.from_json(state_json)
 
 
 def update_state(state: GameState, http_client: urllib3.PoolManager) -> GameState:
