@@ -86,6 +86,16 @@ resource "aws_appsync_datasource" "start_game_datasource" {
   }
 }
 
+resource "aws_appsync_datasource" "play_cards_datasource" {
+  name             = "${var.prefix}_play_cards_datasource"
+  api_id           = aws_appsync_graphql_api.appsync.id
+  service_role_arn = aws_iam_role.appsync_role.arn
+  type             = "AWS_LAMBDA"
+  lambda_config {
+    function_arn = aws_lambda_function.play_cards_lambda.arn
+  }
+}
+
 
 # =================
 # --- Resolvers ---
@@ -163,10 +173,6 @@ resource "aws_appsync_resolver" "create_state_resolver" {
 }
 
 resource "aws_appsync_resolver" "update_state_resolver" {
-  # triggers = {
-  #   vtl_file = md5(file("${path.module}/resolvers/update_state.vtl"))
-  # }
-
   api_id      = aws_appsync_graphql_api.appsync.id
   type        = "Mutation"
   field       = "updateState"
@@ -193,6 +199,16 @@ resource "aws_appsync_resolver" "start_game_resolver" {
   type        = "Mutation"
   field       = "startGame"
   data_source = aws_appsync_datasource.start_game_datasource.name
+
+  # request_template  = file("./resolvers/lambda/request.vtl")
+  # response_template = file("./resolvers/lambda/response.vtl")
+}
+
+resource "aws_appsync_resolver" "play_cards_resolver" {
+  api_id      = aws_appsync_graphql_api.appsync.id
+  type        = "Mutation"
+  field       = "playCards"
+  data_source = aws_appsync_datasource.play_cards_datasource.name
 
   # request_template  = file("./resolvers/lambda/request.vtl")
   # response_template = file("./resolvers/lambda/response.vtl")

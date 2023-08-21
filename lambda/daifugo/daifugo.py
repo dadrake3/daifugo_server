@@ -6,16 +6,17 @@ from .model import Card, CardSet, Discards, GameState, Hand, Pattern, Player
 
 
 class PatternResolver:
+    # TODO: add paradox handler
+
     @staticmethod
     def is_suited(cards: CardSet, top_of_pile: CardSet) -> bool:
-        return cards.suits == top_of_pile.suits
+        return len(top_of_pile) and cards.suits == top_of_pile.suits
 
     @staticmethod
     def is_run(cards: CardSet, top_of_pile: CardSet) -> bool:
-        cards_rank = next(iter(cards.rank))
-        top_of_pile_rank = next(iter(top_of_pile.rank))
-
-        return abs(RANKS[cards_rank] - RANKS[top_of_pile_rank]) == 1
+        return (
+            len(top_of_pile) and abs(RANKS[cards.rank] - RANKS[top_of_pile.rank]) == 1
+        )
 
     @classmethod
     def resolve(cls, cards: CardSet, top_of_pile: CardSet) -> Optional[Pattern]:
@@ -50,8 +51,8 @@ class Validator:
 
     @staticmethod
     def pre_validate(cards: CardSet):
-        if not len(cards.ranks) == 1:
-            raise InvalidPlayError(f"More than one rank {cards.ranks}")
+        if not len({card.rank for card in cards.cards}) == 1:
+            raise InvalidPlayError(f"More than one rank")
 
     @classmethod
     def validate(
@@ -74,7 +75,7 @@ class Validator:
 
     @staticmethod
     def validate_discards(cards: CardSet, discards: List[Card]) -> bool:
-        rank = next(iter(cards.ranks))
+        rank = cards.rank
         if rank not in ["7", "10"]:
             return False
 
@@ -93,13 +94,10 @@ class Validator:
         # if self._top_of_pile.rank == "Joker":
         #     return self._cards.rank == 3 and self._cards.suits == {"Spade"}
 
-        card_rank = next(iter(cards.ranks))
-        pile_rank = next(iter(top_of_pile.ranks))
-
         if direction == UP:
-            return RANKS[card_rank] > RANKS[pile_rank]
+            return RANKS[cards.rank] > RANKS[top_of_pile.rank]
         else:
-            return RANKS[card_rank] < RANKS[pile_rank]
+            return RANKS[cards.rank] < RANKS[top_of_pile.rank]
 
     @staticmethod
     def validate_size(
@@ -128,7 +126,7 @@ class StateResolver:
         cards: CardSet, direction: bool, revolution: bool
     ) -> Tuple[bool, bool]:
         # only supports single deck right now
-        card_rank = next(iter(cards.ranks))
+        card_rank = cards.rank
         if card_rank == "Jack" and len(cards) % 2 == 1:
             direction = not direction
         elif len(cards) == 4:
@@ -162,7 +160,7 @@ class StateResolver:
             new_trick = True
 
         elif direction == DOWN and cards.rank == "3":
-            ext_player_idx = active_player_idx
+            next_player_idx = active_player_idx
             new_trick = True
 
         elif cards.rank == 5:
@@ -202,10 +200,10 @@ class StateResolver:
 
     @staticmethod
     def resolve_discards(cards: CardSet, discards: List[Card]) -> Optional[Discards]:
-        rank = next(iter(cards.ranks))
+        rank = cards.rank
 
         to_forward = []
-        to_pot = cards[::]
+        to_pot = cards.cards[::]
 
         if rank == "7":
             to_forward = discards
@@ -223,7 +221,7 @@ class StateResolver:
         next_player_idx: str,
     ) -> List[Hand]:
         current_hand = hands[active_player_idx]
-        next_hand = next_player_idx[active_player_idx]
+        next_hand = hands[next_player_idx]
 
         for card in discards.to_pot:
             current_hand.cards.remove(card)
@@ -312,7 +310,7 @@ def play_cards(
 
     infered_pattern = PatternResolver.resolve(cards, prev_game_state.top_of_pile)
 
-    if prev_game_state.current_top is not None:
+    if prev_game_state.top_of_pile is not None and len(prev_game_state.top_of_pile):
         Validator.validate(
             cards,
             prev_game_state.top_of_pile,

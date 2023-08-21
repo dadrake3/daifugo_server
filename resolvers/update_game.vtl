@@ -10,7 +10,7 @@
     #set( $expression = "SET" )
 
     #if (!$util.isNull($ctx.args.state_id))
-        $!{expValues.put(":state_id", $util.dynamodb.toDynamoDBJson($context.arguments.state_id))}
+        $!{expValues.put(":state_id", $util.dynamodb.toDynamoDB($context.arguments.state_id))}
         $!{expNames.put("#state_id", "state_id")}
 
         #set( $expression = "${expression} #state_id = :state_id" )

@@ -7,6 +7,7 @@ locals {
     ecr_image_tag       = "latest"
     join_game_lambda_name = "${var.prefix}_join_game"
     start_game_lambda_name = "${var.prefix}_start_game"
+    play_cards_lambda_name = "${var.prefix}_play_cards"
 }
 
 resource "aws_ecr_repository" "repo" {
@@ -54,7 +55,13 @@ resource "aws_cloudwatch_log_group" "start_game_lambda_log_group" {
     }
 }
 
-
+resource "aws_cloudwatch_log_group" "play_cards_lambda_log_group" {
+    name              = "/aws/lambda/${local.play_cards_lambda_name}"
+    retention_in_days = 7
+    lifecycle {
+        prevent_destroy = false
+    }
+}
 
 resource "aws_lambda_function" "join_game_lambda" {
     depends_on = [null_resource.lambda_image_builder, aws_cloudwatch_log_group.join_game_lambda_log_group]
@@ -91,6 +98,28 @@ resource "aws_lambda_function" "start_game_lambda" {
 
     image_config {
         command = ["handlers.start_game_handler"]
+    }
+
+    environment {
+        variables = {
+            API_KEY = aws_appsync_api_key.appsync_api_key.key
+            API_URL = aws_appsync_graphql_api.appsync.uris.GRAPHQL
+        }
+    }
+}
+
+resource "aws_lambda_function" "play_cards_lambda" {
+    depends_on = [null_resource.lambda_image_builder, aws_cloudwatch_log_group.play_cards_lambda_log_group]
+    function_name = "${local.play_cards_lambda_name}"
+    role = aws_iam_role.lambda_role.arn
+    timeout = 300
+    image_uri = "${aws_ecr_repository.repo.repository_url}@${data.aws_ecr_image.lambda_image.id}"
+    package_type = "Image"
+
+    architectures = ["arm64"] # need this because image built locally on arm64 m1 mac
+
+    image_config {
+        command = ["handlers.play_cards_handler"]
     }
 
     environment {

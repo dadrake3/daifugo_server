@@ -1,7 +1,7 @@
-import urllib3
 import boto3
+import urllib3
 
-from .common import post_mutation, get_game
+from .common import get_game, post_mutation
 from .mutations import (CREATE_HAND_MUTATION, CREATE_PLAYER_MUTATION,
                         UPDATE_GAME_MUTATION)
 

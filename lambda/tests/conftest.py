@@ -5,8 +5,9 @@ import boto3
 import pytest
 import urllib3
 from daifugo.common import post_mutation
-from daifugo.model import Game
-from daifugo.mutations import CREATE_GAME_MUTATION
+from daifugo.model import Game, GameState, Player
+from daifugo.mutations import (CREATE_GAME_MUTATION, JOIN_GAME_MUTATION,
+                               START_GAME_MUTATION)
 
 
 @pytest.fixture
@@ -46,6 +47,33 @@ def empty_game(http_client):
     game_json = post_mutation(CREATE_GAME_MUTATION, http_client)
 
     return Game.from_json(game_json)
+
+
+@pytest.fixture
+def players(empty_game, http_client):
+    player_names = ["Daryl", "Will", "Rebers"]
+    players = []
+    for player_name in player_names:
+        player_json = post_mutation(
+            JOIN_GAME_MUTATION,
+            http_client,
+            variables=dict(game_id=empty_game.id, player_name=player_name),
+        )
+
+        players.append(Player.from_json(player_json))
+
+    return players
+
+
+@pytest.fixture
+def initial_game_state(empty_game, players, http_client):
+    state_json = post_mutation(
+        START_GAME_MUTATION,
+        http_client,
+        variables=dict(game_id=empty_game.id),
+    )
+
+    return GameState.from_json(state_json)
 
 
 @pytest.fixture

@@ -11,6 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 def start_game_handler(event, context):
+    # TODO: add logic so only the creator of the game can start it
+
     dynamodb = boto3.resource("dynamodb")
     http_client = urllib3.PoolManager()
 
@@ -42,7 +44,7 @@ def start_game_handler(event, context):
         ),
     )
 
-    post_mutation(
+    update_game_json = post_mutation(
         UPDATE_GAME_MUTATION,
         http_client,
         variables=dict(id=game_id, joinable=False, state_id=state_json["id"]),

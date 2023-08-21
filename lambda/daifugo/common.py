@@ -8,13 +8,18 @@ import urllib3
 from .constants import (API_URL, GAME_TABLE, HAND_TABLE, HTTP_HEADERS,
                         PLAYER_TABLE, STATE_TABLE)
 from .model import Card, Deck, Game, GameState, Hand, Player
-from .mutations import (UPDATE_HAND_MUTATION, UPDATE_PLAYER_MUTATION, CREATE_STATE_MUTATION,
-                        UPDATE_STATE_MUTATION, Mutation)
+from .mutations import (CREATE_STATE_MUTATION, UPDATE_HAND_MUTATION,
+                        UPDATE_PLAYER_MUTATION, UPDATE_STATE_MUTATION,
+                        Mutation)
 
 logger = logging.getLogger(__name__)
 
 
 class InvalidPlayError(ValueError):
+    pass
+
+
+class BadGraphQLRequest(ValueError):
     pass
 
 
@@ -43,8 +48,11 @@ def post_mutation(
         body=json.dumps(request_body),
         headers=HTTP_HEADERS,
     )
+    data = json.loads(response.data)
+    if "errors" in data:
+        raise BadGraphQLRequest(data["errors"])
 
-    return json.loads(response.data)["data"][mutation.name]
+    return data["data"][mutation.name]
 
 
 def get_game(game_id: str, dynamodb) -> Game:
@@ -86,7 +94,12 @@ def update_player(player: Player, http_client: urllib3.PoolManager) -> Player:
     return Player.from_json(player_json)
 
 
-def create_game_state(game_id: str, starting_player_id: str, starting_player_idx: int, http_client: urllib3.PoolManager) -> GameState:
+def create_game_state(
+    game_id: str,
+    starting_player_id: str,
+    starting_player_idx: int,
+    http_client: urllib3.PoolManager,
+) -> GameState:
     state_json = post_mutation(
         CREATE_STATE_MUTATION,
         http_client,
@@ -100,6 +113,7 @@ def create_game_state(game_id: str, starting_player_id: str, starting_player_idx
 
 
 def update_state(state: GameState, http_client: urllib3.PoolManager) -> GameState:
+    cards_json = [card.to_json() for card in state.top_of_pile.cards]
     state_json = post_mutation(
         UPDATE_STATE_MUTATION,
         http_client,
@@ -108,7 +122,7 @@ def update_state(state: GameState, http_client: urllib3.PoolManager) -> GameStat
             active_player_idx=state.active_player_idx,
             last_played_idx=state.last_played_idx,
             active_player_id=state.active_player_id,
-            top_of_pile=state.top_of_pile,
+            top_of_pile=cards_json,
             pot_size=state.pot_size,
             active_pattern=state.active_pattern,
             revolution=state.revolution,
@@ -118,8 +132,8 @@ def update_state(state: GameState, http_client: urllib3.PoolManager) -> GameStat
     return GameState.from_json(state_json)
 
 
-def deal_hands(n_players=5) -> List[List[Card]]:
-    deck = Deck()
+def deal_hands(n_players: int=5, n_jokers: int=0) -> List[List[Card]]:
+    deck = Deck(n_jokers=n_jokers)
     deck.shuffle()
 
     idx = 0

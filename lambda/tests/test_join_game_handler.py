@@ -5,12 +5,17 @@ from daifugo.common import get_game, get_hands, post_mutation
 from daifugo.constants import GAME_TABLE, HAND_TABLE, PLAYER_TABLE
 from daifugo.join_game_lambda import join_game_handler
 from daifugo.model import Game, Player
+from daifugo.mutations import CREATE_GAME_MUTATION
 
 
 @pytest.mark.integration
 def test_join_game_handler_e2e(
-    setup_environment_vars, mocker, empty_context, empty_game, dynamodb
+    setup_environment_vars, mocker, empty_context, dynamodb, http_client
 ):
+    # Setup test
+    game_json = post_mutation(CREATE_GAME_MUTATION, http_client)
+    empty_game = Game.from_json(game_json)
+
     event = dict(arguments=dict(game_id=empty_game.id, player_name="Daryl"))
 
     player_json = join_game_handler(event, empty_context)

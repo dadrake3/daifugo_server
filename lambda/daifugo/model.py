@@ -43,6 +43,11 @@ class Card:
 
     #     return RANKS.get(self.rank)
 
+    # def __repr__(self) -> str:
+        # return f"Card({self.rank}, {self.suit})"
+        # return f"{self.rank} of {self.suit}s"
+        # return self.to_json()
+
     def to_json(self) -> Dict[str, str]:
         return json.dumps(self.__dict__)
 
@@ -56,14 +61,14 @@ class Card:
 
 
 class Deck:
-    def __init__(self, num_jokers=2):
+    def __init__(self, n_jokers=2):
         self._cards = [
             Card(rank, suit)
             for suit, rank in itertools.product(SUITS, RANKS)
             if rank != "Joker"
         ]
 
-        for _ in range(num_jokers):
+        for _ in range(n_jokers):
             self._cards.append(Card(is_joker=True))
 
     def __len__(self):
@@ -94,8 +99,8 @@ class CardSet:
         return {card.suit for card in self.cards}
 
     @property
-    def ranks(self) -> Set[str]:
-        return {card.rank for card in self.cards}
+    def rank(self) -> str:
+        return next(iter({card.rank for card in self.cards}))
 
 
 @dataclass
@@ -181,11 +186,11 @@ class GameState:
         return cls(
             json_obj["id"],
             json_obj["game_id"],
-            json_obj["active_player_idx"],
+            int(json_obj["active_player_idx"]),
             json_obj["active_player_id"],
-            json_obj["last_played_idx"],
+            int(json_obj["last_played_idx"]),
             top_of_pile,
-            json_obj["pot_size"],
+            int(json_obj["pot_size"]),
             json_obj["active_pattern"],
             json_obj["revolution"],
             json_obj["direction"],

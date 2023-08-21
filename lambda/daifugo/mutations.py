@@ -45,8 +45,8 @@ CREATE_PLAYER_MUTATION = Mutation(
 UPDATE_GAME_MUTATION = Mutation(
     "updateGame",
     """
-    mutation UpdateGame($id: ID!, $players: [String], $joinable: Boolean) {
-        updateGame(id: $id, players: $players, joinable: $joinable) {
+    mutation UpdateGame($id: ID!, $players: [String], $joinable: Boolean, $state_id: String) {
+        updateGame(id: $id, players: $players, joinable: $joinable, state_id: $state_id) {
             id
             joinable
             players
@@ -103,24 +103,24 @@ UPDATE_STATE_MUTATION = Mutation(
     """
     mutation UpdateState(
         $id: ID!, 
-        $active_player_idx
-        $last_played_idx: Int
-        $active_player_id: String
-        $top_of_pile: [String]
-        $pot_size: Int
-        $active_pattern: String
-        $revolution: Boolean
+        $active_player_idx,
+        $last_played_idx: Int,
+        $active_player_id: String,
+        $top_of_pile: [String],
+        $pot_size: Int,
+        $active_pattern: String,
+        $revolution: Boolean,
         $direction: Boolean
     ){
         updateState(
-            id: $id
-            active_player_idx: $active_player_idx
-            last_played_idx: $last_played_idx
-            active_player_id: $active_player_id
-            top_of_pile: $top_of_pile
-            pot_size: $pot_size
-            active_pattern: $active_pattern
-            revolution: $revolution
+            id: $id,
+            active_player_idx: $active_player_idx,
+            last_played_idx: $last_played_idx,
+            active_player_id: $active_player_id,
+            top_of_pile: $top_of_pile,
+            pot_size: $pot_size,
+            active_pattern: $active_pattern,
+            revolution: $revolution,
             direction: $direction
         ) {
             id
@@ -149,5 +149,64 @@ CREATE_GAME_MUTATION = Mutation(
             players
         }
     }
-""",
+    """,
+)
+
+
+JOIN_GAME_MUTATION = Mutation(
+    "joinGame",
+    """
+    mutation JoinGame($game_id: ID!, $player_name: String!) {
+        joinGame(game_id: $game_id, player_name: $player_name) {
+            id
+            name
+            game_id
+            hand_id
+            rank
+            has_passed
+        }
+    }
+    """,
+)
+
+
+START_GAME_MUTATION = Mutation(
+    "startGame",
+    """
+    mutation StartGame($game_id: String!) {
+        startGame(game_id: $game_id) {
+            id
+            game_id
+            active_player_idx
+            last_played_idx
+            active_player_id
+            top_of_pile
+            pot_size
+            active_pattern
+            revolution
+            direction
+        }
+    }
+    """,
+)
+
+
+PLAY_CARDS_MUTATION = Mutation(
+    "playCards",
+    """
+    mutation PlayCards($game_id: String!, $player_id: String!, $cards: [String]!, $discards: [String]!){
+        playCards(game_id: $game_id, player_id: $player_id, cards: $cards, discards: $discards){
+            id
+            game_id
+            active_player_idx
+            active_player_id
+            last_played_idx
+            top_of_pile
+            pot_size
+            revolution
+            direction
+            active_pattern
+        }
+    }
+    """,
 )
