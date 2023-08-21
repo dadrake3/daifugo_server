@@ -91,9 +91,9 @@ data "aws_iam_policy_document" "lambda_log_publishing_policy_document" {
 }
 
 resource "aws_iam_policy" "lambda_log_publishing_policy" {
-  name     = "${var.prefix}_lambda_log_publishing_policy"
+  name        = "${var.prefix}_lambda_log_publishing_policy"
   description = "This policy allows lambdas to create log groups"
-  policy = data.aws_iam_policy_document.lambda_log_publishing_policy_document.json
+  policy      = data.aws_iam_policy_document.lambda_log_publishing_policy_document.json
 }
 
 
