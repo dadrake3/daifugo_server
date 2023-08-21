@@ -5,10 +5,10 @@
         "id": $util.dynamodb.toDynamoDBJson($util.autoId()),
     },
     "attributeValues" : {
+		"name": $util.dynamodb.toDynamoDBJson("$ctx.args.name"),
         "game_id" : $util.dynamodb.toDynamoDBJson("$ctx.args.game_id"),
         "hand_id" : $util.dynamodb.toDynamoDBJson($util.defaultIfNull($ctx.args.hand_id, "")),
-		"name": $util.dynamodb.toDynamoDBJson("$ctx.args.name"),
-		"order": $util.dynamodb.toDynamoDBJson(-1),
-		"rank": $util.dynamodb.toDynamoDBJson(-1)
+		"rank": $util.dynamodb.toDynamoDBJson(-1),
+		"has_passed": $util.dynamodb.toDynamoDBJson(false)
     }
 }

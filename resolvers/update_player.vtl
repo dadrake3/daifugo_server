@@ -18,14 +18,14 @@
         #set( $expression = "$expression #rank = :rank" )
     #end
     
-    #if ( !$util.isNull($ctx.args.order) )
-        $!{expValues.put(":order", $util.dynamodb.toDynamoDB($ctx.args.order))}
-        $!{expNames.put("#order", "order")}
+    #if ( !$util.isNull($ctx.args.has_passed) )
+        $!{expValues.put(":has_passed", $util.dynamodb.toDynamoDB($ctx.args.has_passed))}
+        $!{expNames.put("#has_passed", "has_passed")}
         
         #if ( $expression != "SET" )
       		#set( $expression = "$expression," )
     	#end
-        #set( $expression = "$expression #order = :order" )
+        #set( $expression = "$expression #has_passed = :has_passed" )
     #end
     
     #if ( !$util.isNull($ctx.args.hand_id) )

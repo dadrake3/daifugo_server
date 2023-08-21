@@ -15,14 +15,16 @@ type Game {
 type GameState {
 	id: ID!
 	game_id: String!
-	current_player_idx: Int!
-	current_top: [String]!
+	active_player_idx: Int!
+	active_player_id: String!
+	last_played_idx: Int!
+	top_of_pile: [String]!
 	pot_size: Int!
-	active: Boolean!
-	active_pattern: String
 	revolution: Boolean!
 	direction: Boolean!
+	active_pattern: String
 }
+
 
 type Hand {
 	id: ID!
@@ -34,8 +36,8 @@ type Player {
 	name: String!
 	game_id: String!
 	hand_id: String
-	order: Int
 	rank: Int
+	has_passed: Boolean
 }
 
 type Mutation {
@@ -49,21 +51,24 @@ type Mutation {
 	): Game
 	createPlayer(name: String!, game_id: String!, hand_id: String!): Player
 	updatePlayer(
-		id: ID!,
+		id: ID!
+		rank: Int,
 		hand_id: String,
-		order: Int,
-		rank: Int
+		has_passed: Boolean
 	): Player
-	createState(game_id: String!): GameState
+	createState(game_id: String!, active_player_id: String!, active_player_idx: Int!): GameState
 	updateState(
-		id: ID!,
-		current_player_idx: Int!,
-		current_top: [String]!,
-		pot_size: Int!,
-		active: Boolean!,
-		current_pattern: [String]!
+		id: ID!, 
+		active_player_idx: Int,
+		last_played_idx: Int,
+		active_player_id: String,
+		top_of_pile: [String],
+		pot_size: Int,
+		active_pattern: String,
+		revolution: Boolean,
+		direction: Boolean
 	): GameState
-	createHand(cards: [String]): Hand
+	createHand: Hand
 	updateHand(id: ID!, cards: [String]!): Hand
 	
 	## composite lambda endpoints that call multiple mutations

@@ -154,6 +154,10 @@ resource "aws_appsync_resolver" "create_state_resolver" {
 }
 
 resource "aws_appsync_resolver" "update_state_resolver" {
+  # triggers = {
+  #   vtl_file = md5(file("${path.module}/resolvers/update_state.vtl"))
+  # }
+
   api_id      = aws_appsync_graphql_api.appsync.id
   type        = "Mutation"
   field       = "updateState"

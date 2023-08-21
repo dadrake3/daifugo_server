@@ -6,10 +6,13 @@
     },
     "attributeValues" : {
         "game_id" : $util.dynamodb.toDynamoDBJson($ctx.args.game_id),
-		"current_player_idx": $util.dynamodb.toDynamoDBJson(0),
-        "current_top": $util.dynamodb.toDynamoDBJson([]),
+		"active_player_idx": $util.dynamodb.toDynamoDBJson($ctx.args.active_player_idx),
+        "active_player_id": $util.dynamodb.toDynamoDBJson($ctx.args.active_player_id),
+		"last_played_idx": $util.dynamodb.toDynamoDBJson(-1),
+        "top_of_pile": $util.dynamodb.toDynamoDBJson([]),
         "pot_size": $util.dynamodb.toDynamoDBJson(0),
-        "active": $util.dynamodb.toDynamoDBJson(true),
-        "current_pattern": $util.dynamodb.toDynamoDBJson([])
+        "active_pattern": $util.dynamodb.toDynamoDBJson([]),
+        "revolution": $util.dynamodb.toDynamoDBJson(false),
+        "direction": $util.dynamodb.toDynamoDBJson(true)
     }
 }

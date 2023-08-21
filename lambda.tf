@@ -10,11 +10,14 @@ locals {
 resource "aws_ecr_repository" "repo" {
   name = local.ecr_repository_name
 }
+# data "aws_ecr_repository" "repo" {
+#   name = local.ecr_repository_name
+# }
 
 resource "null_resource" "lambda_image_builder" {
     triggers = {
-        python_file = md5(file("${path.module}/lambda/app.py"))
-        docker_file = md5(file("${path.module}/lambda/Dockerfile"))
+        python_file = sha1(join("", [for f in fileset(path.module, "lambda/**") : filesha1(f)]))
+        docker_file = sha1(file("${path.module}/lambda/Dockerfile"))
     }
 
     provisioner "local-exec" {
@@ -45,9 +48,8 @@ resource "aws_lambda_function" "join_game_lambda" {
 
     # handler = "app.join_game_handler"
     image_config {
-        command = ["app.join_game_handler"]
+        command = ["handlers.join_game_handler"]
     }
-
 
     environment {
         variables = {
