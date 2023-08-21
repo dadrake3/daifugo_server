@@ -50,6 +50,10 @@ class Card:
     def from_json(cls, json_str: str) -> "Card":
         return cls(**json.loads(json_str))
 
+    @property
+    def is_starting_card(self) -> bool:
+        return self.suit == "Diamond" and self.rank == "3"
+
 
 class Deck:
     def __init__(self, num_jokers=2):
@@ -170,8 +174,9 @@ class GameState:
 
     @classmethod
     def from_json(cls, json_obj) -> "GameState":
-
-        top_of_pile = [Card.from_json(card_json) for card_json in json_obj["_top_of_pile"]]
+        top_of_pile = [
+            Card.from_json(card_json) for card_json in json_obj["top_of_pile"]
+        ]
 
         return cls(
             json_obj["id"],
@@ -191,6 +196,9 @@ class GameState:
 class Hand:
     id: str
     cards: List[Card]
+
+    def __len__(self) -> int:
+        return len(self.cards)
 
     @classmethod
     def from_json(cls, json_obj) -> "Hand":

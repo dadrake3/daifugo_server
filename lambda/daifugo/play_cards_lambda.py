@@ -4,8 +4,15 @@ from typing import List
 import boto3
 import urllib3
 
-from .common import (get_game, get_game_state, get_hands, get_players,
-                    update_hand, update_player, update_state)
+from .common import (
+    get_game,
+    get_game_state,
+    get_hands,
+    get_players,
+    update_hand,
+    update_player,
+    update_state,
+)
 from .daifugo import play_cards
 from .model import Card, CardSet, Discards, Hand, Player
 

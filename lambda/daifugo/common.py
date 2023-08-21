@@ -5,10 +5,21 @@ from typing import Any, List, Optional
 import boto3
 import urllib3
 
-from .constants import (API_URL, GAME_STATE_TABLE, GAME_TABLE, HAND_TABLE,
-                       HTTP_HEADERS, PLAYER_TABLE)
-from .model import Card, Game, GameState, Hand, Player, Deck
-from .mutations import UPDATE_HAND_MUTATION, UPDATE_STATE_MUTATION, UPDATE_PLAYER_MUTATION
+from .constants import (
+    API_URL,
+    STATE_TABLE,
+    GAME_TABLE,
+    HAND_TABLE,
+    HTTP_HEADERS,
+    PLAYER_TABLE,
+)
+from .model import Card, Deck, Game, GameState, Hand, Player
+from .mutations import (
+    Mutation,
+    UPDATE_HAND_MUTATION,
+    UPDATE_PLAYER_MUTATION,
+    UPDATE_STATE_MUTATION,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -28,9 +39,11 @@ def get_items(ids: List[str], dynamodb, table_name) -> Any:
 
 
 def post_mutation(
-    mutation: str, http_client: urllib3.PoolManager, variables: Optional[str] = None
+    mutation: Mutation,
+    http_client: urllib3.PoolManager,
+    variables: Optional[str] = None,
 ):
-    request_body = {"query": mutation}
+    request_body = {"query": mutation.value}
     if variables:
         request_body["variables"] = variables
 
@@ -41,7 +54,7 @@ def post_mutation(
         headers=HTTP_HEADERS,
     )
 
-    return json.loads(response.data)
+    return json.loads(response.data)["data"][mutation.name]
 
 
 def get_game(game_id: str, dynamodb) -> Game:
@@ -50,7 +63,7 @@ def get_game(game_id: str, dynamodb) -> Game:
 
 
 def get_game_state(state_id: str, dynamodb) -> GameState:
-    game_json = next(iter(get_items([state_id], dynamodb, GAME_STATE_TABLE)))
+    game_json = next(iter(get_items([state_id], dynamodb, STATE_TABLE)))
     return GameState.from_json(game_json)
 
 
@@ -66,33 +79,40 @@ def get_hands(hand_ids: List[str], dynamodb) -> List[Hand]:
 
 def update_hand(
     hand_id: str, cards: List[Card], http_client: urllib3.PoolManager
-) -> None:
+) -> Hand:
     json_cards = [card.to_json() for card in cards]
     variables = {"id": hand_id, "cards": json_cards}
 
-    post_mutation(UPDATE_HAND_MUTATION, http_client, variables)
+    hand_json = post_mutation(UPDATE_HAND_MUTATION, http_client, variables)
+    return Hand.from_json(hand_json)
 
 
-def update_player(player: Player, http_client: urllib3.PoolManager) -> None:
-    post_mutation(UPDATE_PLAYER_MUTATION, http_client, variables=dict(
-        id=player.id,
-        has_passed=player.has_passed,
-        rank=player.rank
-    ))
+def update_player(player: Player, http_client: urllib3.PoolManager) -> Player:
+    player_json = post_mutation(
+        UPDATE_PLAYER_MUTATION,
+        http_client,
+        variables=dict(id=player.id, has_passed=player.has_passed, rank=player.rank),
+    )
+    return Player.from_json(player_json)
 
 
-def update_state(state: GameState, http_client: urllib3.PoolManager) -> None:
-    post_mutation(UPDATE_STATE_MUTATION, http_client, variables=dict(
-        id=state.id,
-        active_player_idx=state.active_player_idx,
-        last_played_idx=state.last_played_idx,
-        active_player_id=state.active_player_id,
-        top_of_pile=state.top_of_pile,
-        pot_size=state.pot_size,
-        active_pattern=state.active_pattern,
-        revolution=state.revolution,
-        direction=state.direction
-    ))
+def update_state(state: GameState, http_client: urllib3.PoolManager) -> GameState:
+    state_json = post_mutation(
+        UPDATE_STATE_MUTATION,
+        http_client,
+        variables=dict(
+            id=state.id,
+            active_player_idx=state.active_player_idx,
+            last_played_idx=state.last_played_idx,
+            active_player_id=state.active_player_id,
+            top_of_pile=state.top_of_pile,
+            pot_size=state.pot_size,
+            active_pattern=state.active_pattern,
+            revolution=state.revolution,
+            direction=state.direction,
+        ),
+    )
+    return GameState.from_json(state_json)
 
 
 def deal_hands(n_players=5) -> List[List[Card]]:
@@ -107,3 +127,10 @@ def deal_hands(n_players=5) -> List[List[Card]]:
         idx = (idx + 1) % n_players
 
     return hands
+
+
+def get_starting_hand(hands: List[List[Card]]) -> int:
+    for i, hand in enumerate(hands):
+        for card in hand:
+            if card.is_starting_card:
+                return i

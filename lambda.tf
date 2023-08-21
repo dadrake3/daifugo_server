@@ -58,3 +58,25 @@ resource "aws_lambda_function" "join_game_lambda" {
         }
     }
 }
+
+resource "aws_lambda_function" "start_game_lambda" {
+    depends_on = [null_resource.lambda_image_builder]
+    function_name = "${var.prefix}_start_game"
+    role = aws_iam_role.lambda_role.arn
+    timeout = 300
+    image_uri = "${aws_ecr_repository.repo.repository_url}@${data.aws_ecr_image.lambda_image.id}"
+    package_type = "Image"
+
+    architectures = ["arm64"] # need this because image built locally on arm64 m1 mac
+
+    image_config {
+        command = ["handlers.start_game_handler"]
+    }
+
+    environment {
+        variables = {
+            API_KEY = aws_appsync_api_key.appsync_api_key.key
+            API_URL = aws_appsync_graphql_api.appsync.uris.GRAPHQL
+        }
+    }
+}

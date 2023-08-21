@@ -1,2 +1,3 @@
 from setuptools import setup
-setup(name='daifugo', packages=['daifugo'])
+
+setup(name="daifugo", packages=["daifugo"])
