@@ -10,12 +10,10 @@ locals {
   play_cards_lambda_name = "${var.prefix}_play_cards"
 }
 
-resource "aws_ecr_repository" "repo" {
+data "aws_ecr_repository" "repo" {
   name = local.ecr_repository_name
 }
-# data "aws_ecr_repository" "repo" {
-#   name = local.ecr_repository_name
-# }
+
 
 resource "null_resource" "lambda_image_builder" {
   triggers = {
