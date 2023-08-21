@@ -1,0 +1,60 @@
+{
+    "version" : "2017-02-28",
+    "operation" : "UpdateItem",
+    "key" : {
+        "id" : $util.dynamodb.toDynamoDBJson($ctx.args.id)
+    },
+    
+    #set( $expNames  = {} )
+    #set( $expValues = {} )
+    #set( $expression = "SET" )
+
+    #if (!$util.isNull($ctx.args.state_id))
+        $!{expValues.put(":state_id", $util.dynamodb.toDynamoDBJson($context.arguments.state_id))}
+        $!{expNames.put("#state_id", "state_id")}
+
+        #set( $expression = "${expression} #state_id = :state_id" )
+    #end
+    
+   #if (!$util.isNull($ctx.args.joinable))
+        $!{expValues.put(":joinable", $util.dynamodb.toDynamoDB($context.arguments.joinable))}
+        $!{expNames.put("#joinable", "joinable")}
+
+		#if( $expression != "SET" )
+        	#set( $expression = "$expression,")
+        #end
+
+        #set( $expression = "$expression #joinable = :joinable" )
+    #end
+    
+    #if( !$util.isNullOrEmpty($ctx.args.players) && $context.arguments.joinable)
+    
+    	$!{expValues.put(":players", $util.dynamodb.toDynamoDB($context.arguments.players))}
+        $!{expNames.put("#players", "players")}
+    	#if( $expression != "SET" )
+        	#set( $expression = "$expression,")
+        #end
+        #set( $expression = "$expression #players = list_append(#players, :players)" )
+        
+        ## #set( $player_count = $util.defaultIfNull($context.arguments.players.size(), 0) )
+        ## #set( $player_count = $player_count + $context.arguments.players )
+        ## $!{expValues.put(":player_count", $util.dynamodb.toDynamoDBJson($player_count))}
+        ## $!{expNames.put("#player_count", "player_count")}
+        ## #if( $expression != "SET" )
+        ## 	#set( $expression = "$expression,")
+        ## #end
+        ## #set( $expression = "$expression #player_count = :player_count" )
+        
+    #end
+  
+    "update" : {
+        "expression" : "${expression}"
+        #if( !${expNames.isEmpty()} )
+            ,"expressionNames" : $utils.toJson($expNames)
+        #end
+        #if( !${expValues.isEmpty()} )
+            ,"expressionValues" : $utils.toJson($expValues)
+        #end
+    }
+    
+}

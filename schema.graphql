@@ -1,0 +1,94 @@
+type Card {
+	suit: String
+	rank: String
+    is_joker: Boolean!
+}
+
+type Game {
+	id: ID!
+	state_id: String!
+	joinable: Boolean!
+	# player_count: Int!
+	players: [String]!
+}
+
+type GameState {
+	id: ID!
+	game_id: String!
+	current_player_idx: Int!
+	current_top: [String]!
+	pot_size: Int!
+	active: Boolean!
+	active_pattern: String
+	revolution: Boolean!
+	direction: Boolean!
+}
+
+type Hand {
+	id: ID!
+	cards: [String]!
+}
+
+type Player {
+	id: ID!
+	name: String!
+	game_id: String!
+	hand_id: String
+	order: Int
+	rank: Int
+}
+
+type Mutation {
+	# pure insert mutations
+	createGame: Game
+	updateGame(
+		id: ID!,
+		state_id: String,
+		joinable: Boolean,
+		players: [String]
+	): Game
+	createPlayer(name: String!, game_id: String!, hand_id: String!): Player
+	updatePlayer(
+		id: ID!,
+		hand_id: String,
+		order: Int,
+		rank: Int
+	): Player
+	createState(game_id: String!): GameState
+	updateState(
+		id: ID!,
+		current_player_idx: Int!,
+		current_top: [String]!,
+		pot_size: Int!,
+		active: Boolean!,
+		current_pattern: [String]!
+	): GameState
+	createHand(cards: [String]): Hand
+	updateHand(id: ID!, cards: [String]!): Hand
+	
+	## composite lambda endpoints that call multiple mutations
+	joinGame(game_id: ID!, player_name: String!): Player
+	startGame(game_id: String!): Game
+	playHand: GameState
+    tradeCards(
+		id_from: ID!,
+		id_to: ID!,
+		cards_from: [String]!,
+		cards_to: [String]
+	): [Hand]
+}
+
+type Query {
+	getGame(id: ID!): Game
+}
+
+type Subscription {
+	updatedHand(id: ID!): Hand
+		@aws_subscribe(mutations: ["updateHand"])
+}
+
+schema {
+	query: Query
+	mutation: Mutation
+	subscription: Subscription
+}

@@ -1,0 +1,38 @@
+{
+    "version" : "2017-02-28",
+
+    "operation" : "UpdateItem",
+
+    "key" : {
+        "id" : $util.dynamodb.toDynamoDBJson($ctx.args.id)
+    },
+
+    #set( $expNames  = {} )
+    #set( $expValues = {} )
+    #set( $expression = "SET" )
+    
+    #foreach( $entry in $context.arguments.entrySet() )
+        #if( $entry.key != "id" )
+            #if( !$util.isNullOrEmpty($entry.value) )
+                ## If the argument is set to "null", then remove that attribute from the item in DynamoDB **
+                $!{expValues.put(":$entry.key", $util.dynamodb.toDynamoDB($entry.value))}
+                $!{expNames.put("#$entry.key", "$entry.key")}
+
+                #set( $expression = "$expression #$entry.key = :$entry.key" )
+                #if ( $foreach.hasNext )
+                    #set( $expression = "${expression}," )
+                #end
+			#end
+        #end
+    #end
+    
+    "update" : {
+        "expression" : "$expression"
+        #if( !${expNames.isEmpty()} )
+            ,"expressionNames" : $utils.toJson($expNames)
+        #end
+        #if( !${expValues.isEmpty()} )
+            ,"expressionValues" : $utils.toJson($expValues)
+        #end
+    }
+}

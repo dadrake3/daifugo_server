@@ -1,0 +1,13 @@
+{
+    "version" : "2017-02-28",
+    "operation" : "PutItem",
+    "key" : {
+        "id": $util.dynamodb.toDynamoDBJson($util.autoId()),
+    },
+    "attributeValues" : {
+        "state_id" : $util.dynamodb.toDynamoDBJson(""),
+		"joinable": $util.dynamodb.toDynamoDBJson(false),
+		"player_count": $util.dynamodb.toDynamoDBJson(0),
+		"players": $util.dynamodb.toDynamoDBJson([])
+    }
+}

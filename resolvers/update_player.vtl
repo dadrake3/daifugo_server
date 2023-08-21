@@ -1,0 +1,50 @@
+{
+    "version" : "2017-02-28",
+
+    "operation" : "UpdateItem",
+
+    "key" : {
+        "id" : $util.dynamodb.toDynamoDBJson($ctx.args.id)
+    },
+
+    #set( $expNames  = {} )
+    #set( $expValues = {} )
+    #set( $expression = "SET" )
+  
+    #if ( !$util.isNull($ctx.args.rank) )
+        $!{expValues.put(":rank", $util.dynamodb.toDynamoDB($ctx.args.rank))}
+        $!{expNames.put("#rank", "rank")}
+
+        #set( $expression = "$expression #rank = :rank" )
+    #end
+    
+    #if ( !$util.isNull($ctx.args.order) )
+        $!{expValues.put(":order", $util.dynamodb.toDynamoDB($ctx.args.order))}
+        $!{expNames.put("#order", "order")}
+        
+        #if ( $expression != "SET" )
+      		#set( $expression = "$expression," )
+    	#end
+        #set( $expression = "$expression #order = :order" )
+    #end
+    
+    #if ( !$util.isNull($ctx.args.hand_id) )
+        $!{expValues.put(":hand_id", $util.dynamodb.toDynamoDB($ctx.args.hand_id))}
+        $!{expNames.put("#hand_id", "hand_id")}
+        
+        #if ( $expression != "SET" )
+      		#set( $expression = "$expression," )
+    	#end
+        #set( $expression = "$expression #hand_id = :hand_id" )
+    #end
+
+    "update" : {
+        "expression" : "$expression"
+        #if( !${expNames.isEmpty()} )
+            ,"expressionNames" : $utils.toJson($expNames)
+        #end
+        #if( !${expValues.isEmpty()} )
+            ,"expressionValues" : $utils.toJson($expValues)
+        #end
+    }
+}

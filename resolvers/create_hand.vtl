@@ -1,0 +1,10 @@
+{
+    "version" : "2017-02-28",
+    "operation" : "PutItem",
+    "key" : {
+        "id": $util.dynamodb.toDynamoDBJson($util.autoId()),
+    },
+    "attributeValues" : {
+        "cards" : $util.dynamodb.toDynamoDBJson($util.defaultIfNull($ctx.args.cards, [])),   
+    }
+}

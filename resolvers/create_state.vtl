@@ -1,0 +1,15 @@
+{
+    "version" : "2017-02-28",
+    "operation" : "PutItem",
+    "key" : {
+        "id": $util.dynamodb.toDynamoDBJson($util.autoId()),
+    },
+    "attributeValues" : {
+        "game_id" : $util.dynamodb.toDynamoDBJson($ctx.args.game_id),
+		"current_player_idx": $util.dynamodb.toDynamoDBJson(0),
+        "current_top": $util.dynamodb.toDynamoDBJson([]),
+        "pot_size": $util.dynamodb.toDynamoDBJson(0),
+        "active": $util.dynamodb.toDynamoDBJson(true),
+        "current_pattern": $util.dynamodb.toDynamoDBJson([])
+    }
+}
