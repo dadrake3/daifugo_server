@@ -1,7 +1,7 @@
 terraform {
   backend "s3" {
-    bucket = "${var.prefix}-terraform-state"
+    bucket = "daifugo_api-terraform-state"
     key    = "terraform.tfstate"
-    region = "${var.region}"
+    region = "us-east-1"
   }
 }
