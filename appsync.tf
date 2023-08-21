@@ -66,6 +66,18 @@ resource "aws_appsync_datasource" "state_table_datasource" {
 
 # Lambda Datasources
 
+# Create data source in appsync from lambda function.
+resource "aws_appsync_datasource" "join_game_datasource" {
+  name             = "${var.prefix}_join_game_datasource"
+  api_id           = aws_appsync_graphql_api.appsync.id
+  service_role_arn = aws_iam_role.appsync_role.arn
+  type             = "AWS_LAMBDA"
+  lambda_config {
+    function_arn = aws_lambda_function.join_game_lambda.arn
+  }
+}
+
+
 # =================
 # --- Resolvers ---
 # -----------------
@@ -149,4 +161,17 @@ resource "aws_appsync_resolver" "update_state_resolver" {
 
   request_template  = file("./resolvers/update_state.vtl")
   response_template = file("./resolvers/response.vtl")
+}
+
+# Lambda Resolvers
+
+# Create resolver using the velocity templates in /resolvers/lambda.
+resource "aws_appsync_resolver" "listPeople_resolver" {
+  api_id      = aws_appsync_graphql_api.appsync.id
+  type        = "Mutation"
+  field       = "joinGame"
+  data_source = aws_appsync_datasource.join_game_datasource.name
+
+  # request_template  = file("./resolvers/lambda/request.vtl")
+  # response_template = file("./resolvers/lambda/response.vtl")
 }
