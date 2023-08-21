@@ -73,7 +73,7 @@ type Mutation {
 	
 	## composite lambda endpoints that call multiple mutations
 	joinGame(game_id: ID!, player_name: String!): Player
-	startGame(game_id: String!): Game
+	startGame(game_id: String!): GameState
 	playHand: GameState
     tradeCards(
 		id_from: ID!,
