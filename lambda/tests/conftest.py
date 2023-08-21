@@ -1,12 +1,12 @@
 import os
 import subprocess
 
+import boto3
 import pytest
 import urllib3
-from daifugo.model import Game
 from daifugo.common import post_mutation
+from daifugo.model import Game
 from daifugo.mutations import CREATE_GAME_MUTATION
-import boto3
 
 
 @pytest.fixture

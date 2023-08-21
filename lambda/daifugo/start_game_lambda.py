@@ -4,16 +4,10 @@ import logging
 import boto3
 import urllib3
 
-from .common import (
-    deal_hands,
-    get_game,
-    get_players,
-    update_hand,
-    post_mutation,
-    get_starting_hand,
-)
-from .mutations import CREATE_STATE_MUTATION
+from .common import (deal_hands, get_game, get_players, get_starting_hand,
+                     post_mutation, update_hand)
 from .model import GameState
+from .mutations import CREATE_STATE_MUTATION
 
 logger = logging.getLogger(__name__)
 

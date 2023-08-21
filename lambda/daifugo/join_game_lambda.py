@@ -1,11 +1,8 @@
 import urllib3
 
 from .common import post_mutation
-from .mutations import (
-    CREATE_HAND_MUTATION,
-    CREATE_PLAYER_MUTATION,
-    UPDATE_GAME_MUTATION,
-)
+from .mutations import (CREATE_HAND_MUTATION, CREATE_PLAYER_MUTATION,
+                        UPDATE_GAME_MUTATION)
 
 
 def join_game_handler(event, context):

@@ -1,11 +1,12 @@
-import pytest
-from daifugo.join_game_lambda import join_game_handler
-from daifugo.start_game_lambda import start_game_handler
-from daifugo.common import post_mutation, get_game, get_hands, get_starting_hand
-from daifugo.constants import GAME_TABLE, PLAYER_TABLE, HAND_TABLE, STATE_TABLE
-from daifugo.model import Game, Player, GameState
 import boto3
+import pytest
 import urllib3
+from daifugo.common import (get_game, get_hands, get_starting_hand,
+                            post_mutation)
+from daifugo.constants import GAME_TABLE, HAND_TABLE, PLAYER_TABLE, STATE_TABLE
+from daifugo.join_game_lambda import join_game_handler
+from daifugo.model import Game, GameState, Player
+from daifugo.start_game_lambda import start_game_handler
 
 
 @pytest.fixture

@@ -5,21 +5,11 @@ from typing import Any, List, Optional
 import boto3
 import urllib3
 
-from .constants import (
-    API_URL,
-    STATE_TABLE,
-    GAME_TABLE,
-    HAND_TABLE,
-    HTTP_HEADERS,
-    PLAYER_TABLE,
-)
+from .constants import (API_URL, GAME_TABLE, HAND_TABLE, HTTP_HEADERS,
+                        PLAYER_TABLE, STATE_TABLE)
 from .model import Card, Deck, Game, GameState, Hand, Player
-from .mutations import (
-    Mutation,
-    UPDATE_HAND_MUTATION,
-    UPDATE_PLAYER_MUTATION,
-    UPDATE_STATE_MUTATION,
-)
+from .mutations import (UPDATE_HAND_MUTATION, UPDATE_PLAYER_MUTATION,
+                        UPDATE_STATE_MUTATION, Mutation)
 
 logger = logging.getLogger(__name__)
 

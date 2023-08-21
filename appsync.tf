@@ -178,6 +178,16 @@ resource "aws_appsync_resolver" "update_state_resolver" {
 
 # Lambda Resolvers
 
+resource "aws_appsync_resolver" "join_game_resolver" {
+  api_id      = aws_appsync_graphql_api.appsync.id
+  type        = "Mutation"
+  field       = "joinGame"
+  data_source = aws_appsync_datasource.join_game_datasource.name
+
+  # request_template  = file("./resolvers/lambda/request.vtl")
+  # response_template = file("./resolvers/lambda/response.vtl")
+}
+
 resource "aws_appsync_resolver" "start_game_resolver" {
   api_id      = aws_appsync_graphql_api.appsync.id
   type        = "Mutation"
