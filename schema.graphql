@@ -89,7 +89,13 @@ type Query {
 
 type Subscription {
 	updatedHand(id: ID!): Hand
-		@aws_subscribe(mutations: ["updateHand"])
+		@aws_subscribe(mutations: ["updateHand","createHand"])
+	updatedState(game_id: ID!): GameState
+		@aws_subscribe(mutations: ["updateState","createState"])
+	updatedPlayer(id: ID!): Player
+		@aws_subscribe(mutations: ["updatePlayer"])
+
+
 }
 
 schema {
