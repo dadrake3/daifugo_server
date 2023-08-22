@@ -15,9 +15,15 @@ class CARD_SPECIALS(Enum):
 
 
 class Pattern(str, Enum):
+    NONE = "None"
     SUITED = "Suited"
     RUN = "Run"
     SUITED_RUN = "SuitedRun"
+
+
+class Direction(int, Enum):
+    UP = 1
+    DOWN = 0
 
 
 class DiscardType(Enum):

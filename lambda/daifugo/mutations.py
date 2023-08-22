@@ -210,3 +210,33 @@ PLAY_CARDS_MUTATION = Mutation(
     }
     """,
 )
+
+
+HAND_SUBSCRIPTION = """
+    subscription UpdatedHand($id: ID!) {
+        updatedHand(id: $id) {
+            id
+            cards
+        }
+    }
+
+"""
+
+
+STATE_SUBSCRIPTION = """
+    subscription UpdatedState($game_id: ID!) {
+        updatedState(game_id: $game_id) {
+            id
+            game_id
+            active_player_idx
+            last_played_idx
+            active_player_id
+            top_of_pile
+            pot_size
+            active_pattern
+            revolution
+            direction
+        }
+    }
+
+"""
