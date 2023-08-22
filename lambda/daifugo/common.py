@@ -137,11 +137,15 @@ def deal_hands(n_players: int = 5, n_jokers: int = 0) -> List[List[Card]]:
     deck.shuffle()
 
     idx = 0
-    hands = [[] for _ in range(n_players)]
+    hands: List[List[Card]] = [[] for _ in range(n_players)]
 
     while len(deck):
         hands[idx].append(deck.draw_one())
         idx = (idx + 1) % n_players
+
+    # # TODO
+    # for hand in hands:
+    #     hand.sort(key=lambda card: (card.rank, card.suit))
 
     return hands
 

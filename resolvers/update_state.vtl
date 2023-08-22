@@ -14,7 +14,6 @@
     #foreach( $entry in $context.arguments.entrySet() )
         #if( $entry.key != "id" )
             #if( !$util.isNullOrEmpty($entry.value) )
-                ## If the argument is set to "null", then remove that attribute from the item in DynamoDB **
                 $!{expValues.put(":$entry.key", $util.dynamodb.toDynamoDB($entry.value))}
                 $!{expNames.put("#$entry.key", "$entry.key")}
 

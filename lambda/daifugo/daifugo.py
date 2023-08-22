@@ -144,6 +144,8 @@ class StateResolver:
     def resolve_next_player(
         cards: CardSet, active_player_idx: int, players: List[Player], direction: bool
     ):
+        # TODO: shortcircuit on paradox
+
         next_player_idx = -1
         new_trick = False
 
@@ -169,7 +171,6 @@ class StateResolver:
             new_trick = True
 
         elif cards.rank == "5":
-            breakpoint()
             # unclear if it loops back around and skips the current player does the trick end
             next_player_idx = active_player_idx
             for _ in range(len(cards) + 1):
