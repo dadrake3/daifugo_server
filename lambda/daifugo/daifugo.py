@@ -60,8 +60,8 @@ class Validator:
         cards: CardSet,
         top_of_pile: CardSet,
         direction: bool,
-        active_pattern: Pattern,
-        infered_pattern: Pattern,
+        active_pattern: Optional[Pattern],
+        infered_pattern: Optional[Pattern],
         discards: List[Card],
     ):
         if not cls.validate_rank(cards, top_of_pile, direction):
@@ -76,7 +76,7 @@ class Validator:
     @staticmethod
     def validate_discards(cards: CardSet, discards: List[Card]) -> bool:
         rank = cards.rank
-        if rank not in ["7", "10"]:
+        if discards and rank not in ["7", "10"]:
             return False
 
         # also need to check if its less but you could potentially end a trick with less discarded
@@ -107,7 +107,12 @@ class Validator:
         return len(cards) == len(top_of_pile)
 
     @staticmethod
-    def validate_pattern(active_pattern: Pattern, infered_pattern: Pattern) -> bool:
+    def validate_pattern(
+        active_pattern: Optional[Pattern], infered_pattern: Optional[Pattern]
+    ) -> bool:
+        if active_pattern is None:
+            return True
+
         if active_pattern == Pattern.RUN:
             return infered_pattern in [Pattern.RUN, Pattern.SUITED_RUN]
 
@@ -165,7 +170,7 @@ class StateResolver:
 
         elif cards.rank == 5:
             # unclear if it loops back around and skips the current player does the trick end
-            for _ in range(len(cards)):
+            for _ in range(len(cards) + 1):
                 next_player_idx = StateResolver.get_next_active_player_idx(
                     active_player_idx, players
                 )
@@ -284,9 +289,9 @@ class StateResolver:
                 last_played_idx=prev_game_state.last_played_idx,
                 _top_of_pile=prev_game_state._top_of_pile if not new_trick else [],
                 pot_size=prev_game_state.pot_size,
-                active_pattern=prev_game_state.active_pattern,
+                active_pattern=prev_game_state.active_pattern if not new_trick else None,
                 revolution=prev_game_state.revolution,
-                direction=prev_game_state.direction,
+                direction=prev_game_state.direction if not new_trick else (UP if not prev_game_state.revolution else DOWN),
             ),
             list(),
             new_players,
@@ -347,9 +352,9 @@ def play_cards(
             last_played_idx=prev_game_state.active_player_idx,
             _top_of_pile=cards.cards if not new_trick else [],
             pot_size=prev_game_state.pot_size + len(cards),
-            active_pattern=new_active_pattern,
+            active_pattern=new_active_pattern if not new_trick else None,
             revolution=new_revolution,
-            direction=new_direction,
+            direction=new_direction if not new_trick else (UP if not new_revolution else DOWN),
         ),
         new_hands,
         new_players,

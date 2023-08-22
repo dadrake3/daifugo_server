@@ -10,6 +10,10 @@ locals {
   play_cards_lambda_name = "${var.prefix}_play_cards"
 }
 
+variable "build_platform" {
+    type = string
+}
+
 data "aws_ecr_repository" "repo" {
   name = local.ecr_repository_name
 }
@@ -69,9 +73,9 @@ resource "aws_lambda_function" "join_game_lambda" {
   image_uri     = "${data.aws_ecr_repository.repo.repository_url}@${data.aws_ecr_image.lambda_image.id}"
   package_type  = "Image"
 
-  architectures = ["arm64"] # need this because image built locally on arm64 m1 mac
+#   architectures = ["arm64"] # need this because image built locally on arm64 m1 mac
+    architectures = ["${var.build_platform}"]
 
-  # handler = "app.join_game_handler"
   image_config {
     command = ["handlers.join_game_handler"]
   }
@@ -92,7 +96,8 @@ resource "aws_lambda_function" "start_game_lambda" {
   image_uri     = "${data.aws_ecr_repository.repo.repository_url}@${data.aws_ecr_image.lambda_image.id}"
   package_type  = "Image"
 
-  architectures = ["arm64"] # need this because image built locally on arm64 m1 mac
+#   architectures = ["arm64"] # need this because image built locally on arm64 m1 mac
+  architectures = ["${var.build_platform}"] # need this because image built locally on arm64 m1 mac
 
   image_config {
     command = ["handlers.start_game_handler"]
@@ -114,7 +119,8 @@ resource "aws_lambda_function" "play_cards_lambda" {
   image_uri     = "${data.aws_ecr_repository.repo.repository_url}@${data.aws_ecr_image.lambda_image.id}"
   package_type  = "Image"
 
-  architectures = ["arm64"] # need this because image built locally on arm64 m1 mac
+#   architectures = ["arm64"] # need this because image built locally on arm64 m1 mac
+  architectures = ["${var.build_platform}"]
 
   image_config {
     command = ["handlers.play_cards_handler"]

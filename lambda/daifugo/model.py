@@ -14,10 +14,10 @@ class CARD_SPECIALS(Enum):
     DISCARD_POT = 2
 
 
-class Pattern(Enum):
-    SUITED = 0
-    RUN = 1
-    SUITED_RUN = 3
+class Pattern(str, Enum):
+    SUITED = "Suited"
+    RUN = "Run"
+    SUITED_RUN = "SuitedRun"
 
 
 class DiscardType(Enum):
@@ -44,9 +44,9 @@ class Card:
     #     return RANKS.get(self.rank)
 
     # def __repr__(self) -> str:
-        # return f"Card({self.rank}, {self.suit})"
-        # return f"{self.rank} of {self.suit}s"
-        # return self.to_json()
+    # return f"Card({self.rank}, {self.suit})"
+    # return f"{self.rank} of {self.suit}s"
+    # return self.to_json()
 
     def to_json(self) -> Dict[str, str]:
         return json.dumps(self.__dict__)
@@ -130,7 +130,7 @@ class Player:
             json_obj["game_id"],
             json_obj["hand_id"],
             json_obj["has_passed"],
-            json_obj["rank"],
+            int(json_obj["rank"]),
         )
 
 
@@ -161,7 +161,7 @@ class GameState:
     last_played_idx: int
     _top_of_pile: List[Card]
     pot_size: int
-    active_pattern: Pattern
+    active_pattern: Optional[Pattern]
     revolution: bool
     direction: bool
 
@@ -183,6 +183,11 @@ class GameState:
             Card.from_json(card_json) for card_json in json_obj["top_of_pile"]
         ]
 
+        if json_obj["active_pattern"]:
+            pattern = Pattern(json_obj["active_pattern"])
+        else:
+            pattern = None
+
         return cls(
             json_obj["id"],
             json_obj["game_id"],
@@ -191,7 +196,7 @@ class GameState:
             int(json_obj["last_played_idx"]),
             top_of_pile,
             int(json_obj["pot_size"]),
-            json_obj["active_pattern"],
+            pattern,
             json_obj["revolution"],
             json_obj["direction"],
         )

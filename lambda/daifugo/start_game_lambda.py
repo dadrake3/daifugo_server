@@ -7,11 +7,14 @@ from .common import (deal_hands, get_game, get_players, get_starting_hand,
                      post_mutation, update_hand)
 from .mutations import CREATE_STATE_MUTATION, UPDATE_GAME_MUTATION
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
 def start_game_handler(event, context):
     # TODO: add logic so only the creator of the game can start it
+
+    logger.info(event)
 
     dynamodb = boto3.resource("dynamodb")
     http_client = urllib3.PoolManager()
@@ -24,7 +27,7 @@ def start_game_handler(event, context):
     players = get_players(player_ids, dynamodb)
 
     hand_ids = [player.hand_id for player in players]
-    hands = deal_hands(n_players)
+    hands = deal_hands(n_players, n_jokers=0)
 
     for cards, hand_id in zip(hands, hand_ids):
         hand = update_hand(hand_id, cards, http_client)

@@ -1,3 +1,4 @@
+import logging
 import os
 from typing import List
 
@@ -8,6 +9,9 @@ from .common import (get_game, get_game_state, get_hands, get_players,
                      update_hand, update_player, update_state)
 from .daifugo import play_cards
 from .model import Card, CardSet, Game, Hand, Player
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def enforce_player_order(game: Game, players: List[Player]) -> List[Player]:
@@ -23,6 +27,8 @@ def play_cards_handler(event, context):
     # add skip handling
     # add logic about removing players with empty hands
     # fix sorting of players and hands bc dynamo db not enforcing a return order
+
+    logger.info(event)
 
     player_id = event["arguments"]["player_id"]
     game_id = event["arguments"]["game_id"]
@@ -57,6 +63,6 @@ def play_cards_handler(event, context):
     for player in new_players:
         update_player(player, http_client)
 
-    update_state(next_game_state, http_client)
+    next_game_state_json = update_state(next_game_state, http_client)
 
-    return next_game_state.to_json()
+    return next_game_state_json

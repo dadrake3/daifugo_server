@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 
 import boto3
 import urllib3
@@ -112,7 +112,7 @@ def create_game_state(
     return GameState.from_json(state_json)
 
 
-def update_state(state: GameState, http_client: urllib3.PoolManager) -> GameState:
+def update_state(state: GameState, http_client: urllib3.PoolManager) -> Dict[str, str]:
     cards_json = [card.to_json() for card in state.top_of_pile.cards]
     state_json = post_mutation(
         UPDATE_STATE_MUTATION,
@@ -129,10 +129,10 @@ def update_state(state: GameState, http_client: urllib3.PoolManager) -> GameStat
             direction=state.direction,
         ),
     )
-    return GameState.from_json(state_json)
+    return state_json
 
 
-def deal_hands(n_players: int=5, n_jokers: int=0) -> List[List[Card]]:
+def deal_hands(n_players: int = 5, n_jokers: int = 0) -> List[List[Card]]:
     deck = Deck(n_jokers=n_jokers)
     deck.shuffle()
 

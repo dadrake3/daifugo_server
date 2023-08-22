@@ -103,7 +103,7 @@ UPDATE_STATE_MUTATION = Mutation(
     """
     mutation UpdateState(
         $id: ID!, 
-        $active_player_idx,
+        $active_player_idx: Int,
         $last_played_idx: Int,
         $active_player_id: String,
         $top_of_pile: [String],

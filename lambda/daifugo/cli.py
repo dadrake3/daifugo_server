@@ -10,6 +10,7 @@ from daifugo.constants import GAME_TABLE, HAND_TABLE, PLAYER_TABLE, STATE_TABLE
 from daifugo.model import Game, GameState, Player
 from daifugo.mutations import (CREATE_GAME_MUTATION, JOIN_GAME_MUTATION,
                                PLAY_CARDS_MUTATION, START_GAME_MUTATION)
+from daifugo.play_cards_lambda import play_cards_handler
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -82,16 +83,18 @@ def get_hand_cli(player_id: str):
 @cli.command()
 @click.argument("game_id", type=str)
 @click.argument("player_id", type=str)
-@click.option("--cards", type=str)
-@click.option("--discards", type=str)
+@click.argument("cards", type=str)
+@click.argument("discards", type=str)
 def play_cards(game_id: str, player_id: str, cards: str, discards: str):
     dynamodb = boto3.resource("dynamodb")
     player = next(iter(get_players([player_id], dynamodb)))
     hand = next(iter(get_hands([player.hand_id], dynamodb)))
-    
-    card_ids = list(map(int, cards.split(",")))
-    _cards = list(map(hand.cards.__getitem__, card_ids))
-    _cards = list(map(lambda card: card.to_json(), _cards))
+
+    _cards = []
+    if cards:
+        card_ids = list(map(int, cards.split(",")))
+        _cards = list(map(hand.cards.__getitem__, card_ids))
+        _cards = list(map(lambda card: card.to_json(), _cards))
 
     _discards = []
     if discards:
@@ -100,6 +103,9 @@ def play_cards(game_id: str, player_id: str, cards: str, discards: str):
         _discards = list(map(lambda card: card.to_json(), _discards))
 
     http_client = urllib3.PoolManager()
+
+    # state_json =play_cards_handler(event=dict(arguments=dict(game_id=game_id, player_id=player_id, cards=_cards, discards=_discards)), context={})
+
     state_json = post_mutation(
         PLAY_CARDS_MUTATION,
         http_client,
@@ -119,6 +125,13 @@ def get_state(game_id: str):
     state = get_game_state(game.state_id, dynamodb)
     logger.info(state)
 
+
+@cli.command("get-game")
+@click.argument("game_id", type=str)
+def get_game_cli(game_id: str):
+    dynamodb = boto3.resource("dynamodb")
+    game = get_game(game_id, dynamodb)
+    logger.info(game)
 
 
 @cli.command()

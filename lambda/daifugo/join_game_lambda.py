@@ -1,9 +1,14 @@
+import logging
+
 import boto3
 import urllib3
 
 from .common import get_game, post_mutation
 from .mutations import (CREATE_HAND_MUTATION, CREATE_PLAYER_MUTATION,
                         UPDATE_GAME_MUTATION)
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def join_game_handler(event, context):
@@ -13,6 +18,8 @@ def join_game_handler(event, context):
     TODO: assert that the game actually exists in dyanmo
 
     """
+    logger.info(event)
+
     dynamodb = boto3.resource("dynamodb")
     game_id = event["arguments"]["game_id"]
 
