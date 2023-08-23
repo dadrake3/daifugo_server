@@ -113,15 +113,21 @@ def play_cards(game_id: str, player_id: str, cards: str, discards: str):
 
     http_client = urllib3.PoolManager()
 
-    # state_json =play_cards_handler(event=dict(arguments=dict(game_id=game_id, player_id=player_id, cards=_cards, discards=_discards)), context={})
-
-    state_json = post_mutation(
-        PLAY_CARDS_MUTATION,
-        http_client,
-        variables=dict(
-            game_id=game_id, player_id=player_id, cards=_cards, discards=_discards
+    state_json = play_cards_handler(
+        event=dict(
+            arguments=dict(
+                game_id=game_id, player_id=player_id, cards=_cards, discards=_discards
+            )
         ),
+        context={},
     )
+    # state_json = post_mutation(
+    #     PLAY_CARDS_MUTATION,
+    #     http_client,
+    #     variables=dict(
+    #         game_id=game_id, player_id=player_id, cards=_cards, discards=_discards
+    #     ),
+    # )
     # state = GameState.from_json(state_json)
     for key, value in state_json.items():
         logger.info(f"{key}: {value}")
@@ -161,8 +167,6 @@ def sub_to_hand(hand_id: str):
     for result in client.subscribe(
         gql(HAND_SUBSCRIPTION), variable_values=dict(id=hand_id)
     ):
-        # breakpoint()
-        # logger.info(result)
         for i, card in enumerate(result["updatedHand"]["cards"]):
             card = json.loads(card)
             logger.info(f"{i}, {card['rank']} of {card['suit']}s")
@@ -185,7 +189,8 @@ def sub_to_state(game_id: str):
     for result in client.subscribe(
         gql(STATE_SUBSCRIPTION), variable_values=dict(game_id=game_id)
     ):
-        logger.info(result)
+        for key, value in result["updatedState"].items():
+            logger.info(f"{key}: {value}")
 
 
 @cli.command()

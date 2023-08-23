@@ -171,7 +171,6 @@ class StateResolver:
             new_trick = True
 
         elif cards.rank == "5":
-            # unclear if it loops back around and skips the current player does the trick end
             next_player_idx = active_player_idx
             for _ in range(len(cards) + 1):
                 next_player_idx = StateResolver.get_next_active_player_idx(

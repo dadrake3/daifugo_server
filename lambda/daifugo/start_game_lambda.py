@@ -19,7 +19,7 @@ def start_game_handler(event, context):
     dynamodb = boto3.resource("dynamodb")
     http_client = urllib3.PoolManager()
 
-    game_id = event["arguments"]["game_id"]
+    game_id = event["arguments"]["game_id"].upper()
     game = get_game(game_id, dynamodb)
 
     player_ids = game.players

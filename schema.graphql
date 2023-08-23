@@ -8,7 +8,6 @@ type Game {
 	id: ID!
 	state_id: String!
 	joinable: Boolean!
-	# player_count: Int!
 	players: [String]!
 }
 

@@ -54,7 +54,7 @@ class Card:
     # return f"{self.rank} of {self.suit}s"
     # return self.to_json()
 
-    def to_json(self) -> Dict[str, str]:
+    def to_json(self) -> str:
         return json.dumps(self.__dict__)
 
     @classmethod
@@ -146,6 +146,9 @@ class Game:
     state_id: str
     joinable: bool
     players: List[str]
+
+    def to_json(self) -> str:
+        return json.dumps(self.__dict__)
 
     @classmethod
     def from_json(cls, json_obj) -> "Game":

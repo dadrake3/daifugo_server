@@ -1,4 +1,5 @@
 import os
+import string
 
 API_KEY = os.environ.get("API_KEY")
 API_URL = os.environ.get("API_URL")
@@ -35,3 +36,6 @@ HTTP_HEADERS = {
     "x-api-key": API_KEY,
     "cache-control": "no-cache",
 }
+
+ID_CHARS = string.ascii_uppercase
+ID_LENGTH = 4

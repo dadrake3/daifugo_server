@@ -1,3 +1,5 @@
+## THIS IS NO LONGER USED
+
 {
     "version" : "2017-02-28",
     "operation" : "PutItem",
@@ -7,7 +9,6 @@
     "attributeValues" : {
         "state_id" : $util.dynamodb.toDynamoDBJson(""),
 		"joinable": $util.dynamodb.toDynamoDBJson(true),
-		"player_count": $util.dynamodb.toDynamoDBJson(0),
 		"players": $util.dynamodb.toDynamoDBJson([])
     }
 }

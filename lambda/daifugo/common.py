@@ -1,12 +1,14 @@
 import json
 import logging
+import random
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 import boto3
 import urllib3
 
 from .constants import (API_URL, GAME_TABLE, HAND_TABLE, HTTP_HEADERS,
-                        PLAYER_TABLE, STATE_TABLE)
+                        ID_CHARS, ID_LENGTH, PLAYER_TABLE, STATE_TABLE)
 from .model import Card, Deck, Game, GameState, Hand, Player
 from .mutations import (CREATE_STATE_MUTATION, UPDATE_HAND_MUTATION,
                         UPDATE_PLAYER_MUTATION, UPDATE_STATE_MUTATION,
@@ -31,6 +33,29 @@ def get_items(ids: List[str], dynamodb, table_name) -> Any:
         ReturnConsumedCapacity="TOTAL",
     )
     return data["Responses"][table_name]
+
+
+def generate_id() -> str:
+    random.seed(datetime.now().timestamp())
+    return "".join(random.choices(ID_CHARS, k=ID_LENGTH))
+
+
+def generate_unique_game_id(dynamodb) -> str:
+    # TODO: Make sure this is only alphanumeric
+
+    while 1:
+        game_id = generate_id()
+
+        data = dynamodb.batch_get_item(
+            RequestItems={
+                GAME_TABLE: {"Keys": [{"id": game_id}], "ConsistentRead": True}
+            },
+        )
+
+        if not data["Responses"][GAME_TABLE]:
+            break
+
+    return game_id
 
 
 def post_mutation(

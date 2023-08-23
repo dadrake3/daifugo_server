@@ -96,6 +96,16 @@ resource "aws_appsync_datasource" "play_cards_datasource" {
   }
 }
 
+resource "aws_appsync_datasource" "create_game_datasource" {
+  name             = "${var.prefix}_create_game_datasource"
+  api_id           = aws_appsync_graphql_api.appsync.id
+  service_role_arn = aws_iam_role.appsync_role.arn
+  type             = "AWS_LAMBDA"
+  lambda_config {
+    function_arn = aws_lambda_function.create_game_lambda.arn
+  }
+}
+
 
 # =================
 # --- Resolvers ---
@@ -103,15 +113,16 @@ resource "aws_appsync_datasource" "play_cards_datasource" {
 
 # Unit VTL Resolvers
 
-resource "aws_appsync_resolver" "create_game_resolver" {
-  api_id      = aws_appsync_graphql_api.appsync.id
-  type        = "Mutation"
-  field       = "createGame"
-  data_source = aws_appsync_datasource.game_table_datasource.name
+# resource "aws_appsync_resolver" "create_game_resolver" {
+#   api_id      = aws_appsync_graphql_api.appsync.id
+#   type        = "Mutation"
+#   field       = "createGame"
+#   data_source = aws_appsync_datasource.game_table_datasource.name
 
-  request_template  = file("./resolvers/create_game.vtl")
-  response_template = file("./resolvers/response.vtl")
-}
+#   request_template  = file("./resolvers/create_game.vtl")
+#   response_template = file("./resolvers/response.vtl")
+# }
+
 resource "aws_appsync_resolver" "update_game_resolver" {
   api_id      = aws_appsync_graphql_api.appsync.id
   type        = "Mutation"
@@ -209,6 +220,16 @@ resource "aws_appsync_resolver" "play_cards_resolver" {
   type        = "Mutation"
   field       = "playCards"
   data_source = aws_appsync_datasource.play_cards_datasource.name
+
+  # request_template  = file("./resolvers/lambda/request.vtl")
+  # response_template = file("./resolvers/lambda/response.vtl")
+}
+
+resource "aws_appsync_resolver" "create_game_resolver" {
+  api_id      = aws_appsync_graphql_api.appsync.id
+  type        = "Mutation"
+  field       = "createGame"
+  data_source = aws_appsync_datasource.create_game_datasource.name
 
   # request_template  = file("./resolvers/lambda/request.vtl")
   # response_template = file("./resolvers/lambda/response.vtl")

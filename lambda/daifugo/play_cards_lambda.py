@@ -31,7 +31,7 @@ def play_cards_handler(event, context):
     logger.info(event)
 
     player_id = event["arguments"]["player_id"]
-    game_id = event["arguments"]["game_id"]
+    game_id = event["arguments"]["game_id"].upper()
     cards = CardSet(
         [Card.from_json(card_json) for card_json in event["arguments"]["cards"]]
     )

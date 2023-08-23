@@ -21,7 +21,7 @@ def join_game_handler(event, context):
     logger.info(event)
 
     dynamodb = boto3.resource("dynamodb")
-    game_id = event["arguments"]["game_id"]
+    game_id = event["arguments"]["game_id"].upper()
 
     game = get_game(game_id, dynamodb)
     if not game.joinable:

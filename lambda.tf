@@ -2,12 +2,13 @@
 data "aws_caller_identity" "current" {}
 
 locals {
-  account_id             = data.aws_caller_identity.current.account_id
-  ecr_repository_name    = "${var.prefix}-ecr"
-  ecr_image_tag          = "latest"
-  join_game_lambda_name  = "${var.prefix}_join_game"
-  start_game_lambda_name = "${var.prefix}_start_game"
-  play_cards_lambda_name = "${var.prefix}_play_cards"
+  account_id              = data.aws_caller_identity.current.account_id
+  ecr_repository_name     = "${var.prefix}-ecr"
+  ecr_image_tag           = "latest"
+  join_game_lambda_name   = "${var.prefix}_join_game"
+  start_game_lambda_name  = "${var.prefix}_start_game"
+  play_cards_lambda_name  = "${var.prefix}_play_cards"
+  create_game_lambda_name = "${var.prefix}_create_game"
 }
 
 variable "build_platform" {
@@ -21,8 +22,9 @@ data "aws_ecr_repository" "repo" {
 
 resource "null_resource" "lambda_image_builder" {
   triggers = {
-    python_file = sha1(join("", [for f in fileset(path.module, "lambda/**") : filesha1(f)]))
-    docker_file = sha1(file("${path.module}/lambda/Dockerfile"))
+    python_file    = sha1(join("", [for f in fileset(path.module, "lambda/**") : filesha1(f)]))
+    docker_file    = sha1(file("${path.module}/lambda/Dockerfile"))
+    build_platform = var.build_platform # need this so github rebuilds if we last built locally
   }
 
   provisioner "local-exec" {
@@ -59,6 +61,14 @@ resource "aws_cloudwatch_log_group" "start_game_lambda_log_group" {
 
 resource "aws_cloudwatch_log_group" "play_cards_lambda_log_group" {
   name              = "/aws/lambda/${local.play_cards_lambda_name}"
+  retention_in_days = 7
+  lifecycle {
+    prevent_destroy = false
+  }
+}
+
+resource "aws_cloudwatch_log_group" "create_game_lambda_log_group" {
+  name              = "/aws/lambda/${local.create_game_lambda_name}"
   retention_in_days = 7
   lifecycle {
     prevent_destroy = false
@@ -132,4 +142,21 @@ resource "aws_lambda_function" "play_cards_lambda" {
       API_URL = aws_appsync_graphql_api.appsync.uris.GRAPHQL
     }
   }
+}
+
+resource "aws_lambda_function" "create_game_lambda" {
+  depends_on    = [null_resource.lambda_image_builder, aws_cloudwatch_log_group.create_game_lambda_log_group]
+  function_name = local.create_game_lambda_name
+  role          = aws_iam_role.lambda_role.arn
+  timeout       = 300
+  image_uri     = "${data.aws_ecr_repository.repo.repository_url}@${data.aws_ecr_image.lambda_image.id}"
+  package_type  = "Image"
+
+  #   architectures = ["arm64"] # need this because image built locally on arm64 m1 mac
+  architectures = ["${var.build_platform}"]
+
+  image_config {
+    command = ["handlers.create_game_handler"]
+  }
+
 }
